@@ -45,11 +45,6 @@ public class MainPresenter implements MainContract.Presenter {
         loadAccountsFromServer();
     }
 
-    @Override
-    public void configChanged() {
-        loadAccountsFromDatabase();
-    }
-
     public void loadAccountsFromServer() {
         LoadAccountSchemeUseCase loadFieldsUseCase = new LoadAccountSchemeUseCase(repository);
         CreateAccountTableUseCase createTableUseCase = new CreateAccountTableUseCase(repository);
