@@ -15,7 +15,11 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.radik.testing.testapplication.R;
+import com.radik.testing.testapplication.di.components.DaggerFragmentComponent;
+import com.radik.testing.testapplication.di.modules.ListFragmentModule;
 import com.radik.testing.testapplication.presentation.paging.AccountListAdapter;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,7 +39,11 @@ public class AccountListFragment extends Fragment implements MainContract.Fragme
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        presenter = new MainPresenter(this);
+        presenter = DaggerFragmentComponent
+                .builder()
+                .listFragmentModule(new ListFragmentModule(this))
+                .build()
+                .getPresenter();
         isInitDone = false;
         presenter.create();
         Log.e(TAG, "onCreate: " );

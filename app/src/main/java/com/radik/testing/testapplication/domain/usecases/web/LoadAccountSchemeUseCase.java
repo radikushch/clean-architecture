@@ -1,16 +1,16 @@
 package com.radik.testing.testapplication.domain.usecases.web;
 
 import com.radik.testing.testapplication.domain.model.describe.AccountScheme;
-import com.radik.testing.testapplication.domain.repository.AccountRepository;
-import com.radik.testing.testapplication.domain.usecases.UseCase;
+import com.radik.testing.testapplication.domain.repository.AccountWebRepository;
 
 import io.reactivex.Maybe;
-import io.reactivex.Single;
 
-public class LoadAccountSchemeUseCase extends UseCase {
+public class LoadAccountSchemeUseCase {
 
-    public LoadAccountSchemeUseCase(AccountRepository repository) {
-        super(repository);
+    private AccountWebRepository repository;
+
+    public LoadAccountSchemeUseCase(AccountWebRepository repository) {
+        this.repository = repository;
     }
 
     public Maybe<AccountScheme> loadAccountScheme() {

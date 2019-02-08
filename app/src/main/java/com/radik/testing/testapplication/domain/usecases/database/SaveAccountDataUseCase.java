@@ -1,18 +1,15 @@
 package com.radik.testing.testapplication.domain.usecases.database;
 
-import com.radik.testing.testapplication.domain.model.Account;
 import com.radik.testing.testapplication.domain.model.query.AccountData;
-import com.radik.testing.testapplication.domain.repository.AccountRepository;
-import com.radik.testing.testapplication.domain.usecases.UseCase;
-
-import java.util.List;
+import com.radik.testing.testapplication.domain.repository.AccountDatabaseRepository;
 
 import io.reactivex.Completable;
-import io.reactivex.Observable;
 
-public class SaveAccountDataUseCase extends UseCase {
-    public SaveAccountDataUseCase(AccountRepository repository) {
-        super(repository);
+public class SaveAccountDataUseCase {
+    private AccountDatabaseRepository repository;
+
+    public SaveAccountDataUseCase(AccountDatabaseRepository repository) {
+        this.repository = repository;
     }
 
     public Completable saveAccounts(AccountData accountData) {

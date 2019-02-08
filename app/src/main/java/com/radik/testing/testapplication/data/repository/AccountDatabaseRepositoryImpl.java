@@ -1,6 +1,5 @@
 package com.radik.testing.testapplication.data.repository;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
@@ -9,47 +8,24 @@ import com.radik.testing.testapplication.data.database.LocalDatabaseContract;
 import com.radik.testing.testapplication.data.repository.converters.MapToAccountConverter;
 import com.radik.testing.testapplication.data.repository.converters.RecordToMapConverter;
 import com.radik.testing.testapplication.data.repository.converters.SchemeToFieldsConverter;
-import com.radik.testing.testapplication.data.web.NetworkClient;
 import com.radik.testing.testapplication.domain.model.Account;
 import com.radik.testing.testapplication.domain.model.describe.AccountScheme;
 import com.radik.testing.testapplication.domain.model.query.AccountData;
 import com.radik.testing.testapplication.domain.model.query.AccountRecord;
-import com.radik.testing.testapplication.domain.repository.AccountRepository;
+import com.radik.testing.testapplication.domain.repository.AccountDatabaseRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Completable;
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 
-public class AccountRepositoryImpl implements AccountRepository {
+public class AccountDatabaseRepositoryImpl implements AccountDatabaseRepository {
 
     private static DBHelper dbHelper;
-
-    public AccountRepositoryImpl() {
-    }
-
-    @Override
-    public Maybe<AccountScheme> loadAccountScheme() {
-        return loadSchemeWithRetrofit();
-    }
-
-    private Maybe<AccountScheme> loadSchemeWithRetrofit() {
-        return NetworkClient.getInstance().getAccountDataService().getAccountScheme();
-    }
-
-    @Override
-    public Maybe<AccountData> loadAccountData() {
-        return loadDataWithRetrofit();
-    }
-
-    private Maybe<AccountData> loadDataWithRetrofit() {
-        return NetworkClient.getInstance().getAccountDataService().getAccountData();
-    }
+    //private Context context;
 
     @Override
     public Completable createTable(Context context, AccountScheme accountScheme) {
@@ -74,11 +50,11 @@ public class AccountRepositoryImpl implements AccountRepository {
     private Completable saveToLocalDatabase(AccountData accountData) {
         if(dbHelper == null) return null;
         return Single.create((SingleOnSubscribe<List<String>>) e -> {
-                    List<String> columns = dbHelper.getColumnNames(LocalDatabaseContract.AccountTable.NAME);
-                    if(columns == null || columns.size() == 0)
-                         e.onError(new Throwable("Table doesn't have columns"));
-                    else e.onSuccess(columns);
-                })
+            List<String> columns = dbHelper.getColumnNames(LocalDatabaseContract.AccountTable.NAME);
+            if(columns == null || columns.size() == 0)
+                e.onError(new Throwable("Table doesn't have columns"));
+            else e.onSuccess(columns);
+        })
                 .flatMapCompletable(fields -> Completable.create(e -> {
                     Long id;
                     List<AccountRecord> records = accountData.getRecords();
@@ -116,15 +92,15 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public List<Account> getBatchAccountData(int offset, int amount) {
-            Cursor cursor = dbHelper.queryBatch(LocalDatabaseContract.AccountTable.NAME, offset, amount);
-                List<Account> accounts = new ArrayList<>();
-                if(cursor.moveToFirst()) {
-                    do {
-                        accounts.add(MapToAccountConverter.convert(cursor));
-                    }while(cursor.moveToNext());
-                }
-                dbHelper.close();
-                cursor.close();
-            return accounts;
+        Cursor cursor = dbHelper.queryBatch(LocalDatabaseContract.AccountTable.NAME, offset, amount);
+        List<Account> accounts = new ArrayList<>();
+        if(cursor.moveToFirst()) {
+            do {
+                accounts.add(MapToAccountConverter.convert(cursor));
+            }while(cursor.moveToNext());
+        }
+        dbHelper.close();
+        cursor.close();
+        return accounts;
     }
 }

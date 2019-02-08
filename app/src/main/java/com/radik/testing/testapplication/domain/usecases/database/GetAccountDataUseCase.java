@@ -1,17 +1,18 @@
 package com.radik.testing.testapplication.domain.usecases.database;
 
 import com.radik.testing.testapplication.domain.model.Account;
-import com.radik.testing.testapplication.domain.repository.AccountRepository;
-import com.radik.testing.testapplication.domain.usecases.UseCase;
+import com.radik.testing.testapplication.domain.repository.AccountDatabaseRepository;
 
 import java.util.List;
 
 import io.reactivex.Observable;
 
-public class GetAccountDataUseCase extends UseCase {
+public class GetAccountDataUseCase {
 
-    public GetAccountDataUseCase(AccountRepository repository) {
-        super(repository);
+    private AccountDatabaseRepository repository;
+
+    public GetAccountDataUseCase(AccountDatabaseRepository repository) {
+        this.repository = repository;
     }
 
     public Observable<Account> getAccountData() {

@@ -1,14 +1,12 @@
 package com.radik.testing.testapplication.presentation;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.paging.PagedList;
-import android.util.Log;
 
-import com.radik.testing.testapplication.data.repository.AccountRepositoryImpl;
+import com.radik.testing.testapplication.data.repository.AccountDatabaseRepositoryImpl;
+import com.radik.testing.testapplication.data.repository.AccountWebRepositoryImpl;
 import com.radik.testing.testapplication.domain.model.Account;
-import com.radik.testing.testapplication.domain.repository.AccountRepository;
+import com.radik.testing.testapplication.domain.repository.AccountDatabaseRepository;
+import com.radik.testing.testapplication.domain.repository.AccountWebRepository;
 import com.radik.testing.testapplication.domain.usecases.database.CreateAccountTableUseCase;
 import com.radik.testing.testapplication.domain.usecases.database.GetAccountDataUseCase;
 import com.radik.testing.testapplication.domain.usecases.web.LoadAccountSchemeUseCase;
@@ -21,6 +19,8 @@ import com.radik.testing.testapplication.presentation.paging.MyPositionalDataSou
 
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -32,12 +32,14 @@ public class MainPresenter implements MainContract.Presenter {
     public static final int LIMIT = 40;
 
     private MainContract.FragmentView view;
-    private AccountRepository repository;
+    private AccountWebRepository webRepository;
+    private AccountDatabaseRepository databaseRepository;
     private Disposable disposable;
 
     public MainPresenter(MainContract.FragmentView view) {
         this.view = view;
-        repository = new AccountRepositoryImpl();
+        webRepository = new AccountWebRepositoryImpl();
+        databaseRepository = new AccountDatabaseRepositoryImpl();
     }
 
     @Override
@@ -46,10 +48,10 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     public void loadAccountsFromServer() {
-        LoadAccountSchemeUseCase loadFieldsUseCase = new LoadAccountSchemeUseCase(repository);
-        CreateAccountTableUseCase createTableUseCase = new CreateAccountTableUseCase(repository);
-        LoadAccountDataUseCase loadRecordsUseCase = new LoadAccountDataUseCase(repository);
-        SaveAccountDataUseCase saveRecordsUseCase = new SaveAccountDataUseCase(repository);
+        LoadAccountSchemeUseCase loadFieldsUseCase = new LoadAccountSchemeUseCase(webRepository);
+        CreateAccountTableUseCase createTableUseCase = new CreateAccountTableUseCase(databaseRepository);
+        LoadAccountDataUseCase loadRecordsUseCase = new LoadAccountDataUseCase(webRepository);
+        SaveAccountDataUseCase saveRecordsUseCase = new SaveAccountDataUseCase(databaseRepository);
         disposable = loadFieldsUseCase.loadAccountScheme()
                 .flatMapCompletable(accountScheme -> createTableUseCase.createTable(view.context(), accountScheme))
                 .andThen(loadRecordsUseCase.loadAccountData())
@@ -64,7 +66,7 @@ public class MainPresenter implements MainContract.Presenter {
 
     private void loadAccountsFromDatabase() {
         AccountListAdapter accountListAdapter;
-        GetAccountDataUseCase getAccountDataUseCase = new GetAccountDataUseCase(repository);
+        GetAccountDataUseCase getAccountDataUseCase = new GetAccountDataUseCase(databaseRepository);
         MyPositionalDataSource dataSource = new MyPositionalDataSource(getAccountDataUseCase);
 
         PagedList.Config config = new PagedList.Config.Builder()
